@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Links</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="icon" type="image/x-icon" sizes="16x16" href="data:image/x-icon;base64,AAABAAEAEBAAAAEACABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACBenUAloFsAJmCawCKgHgAjIJ2AJmEbwCNg3cAj4V5AJOFeQB6i3cAmIl4AHqNdQB9d8cAfpJ2AH+SdgCijnoAvZNhAH56zgC9lGMAo5B7AKOSewClknsApJN8AMKYYgCnlHsAh5l5AI2aeACJmnoAzJ5iANigWACOnnwA2qJaAIF+8gB+fvYAf3/zAFGF7wB/f/cA3aRbAJKjewCAgPgAf4L3ANymYACWpX0A26hfAJemfgBSifoAral1AJipfQCWoJ0AlqCfAJmqfgCVoZ4Am6p+AFWM/QDrrV0A6a1fAOetYQCwrHgA665fALCsegBjkPUAWI/+AGCQ/gBflP8AYpX8AIakwgBjlv8Al6mxAJbFWQBpmv8Aa5z/AHGc/wBznv8Am6+5AFKo8ABUqPAAUqnyAHWi/wCPqd8An89bAJ/QWgCdscMAd6T/AFSr9ACes8AAo7W/AKG1xQC00mQAobjHAKfZWQCZt9EAttVjAKvbVwBXsv8AlrLsAJ7SfgCs3FgAp7vLAJ633ABhs/8An9N/AK7eWgBltf8AnbnfAKi+zgCfuuMAodeBAGK5/ABhuf0AmrfyAGu4/wCguO4AYrr+AKHA1wBpuv8AotqAAJy59ABhvv8As+hYAKPD2wCmw9wAa7//AKXE2wBywfgAb8D/AKfB6QB0wvgAdcD/AHPC/wCowu4At+1ZAKXH3wC67VkAdcP/ALvuWACoydwAqMTuAHfE/wClwP0AncXxAHXG/wB3x/8Al8X/AJvF/wCvzt8Amcf/AK3O4QCnx/sArs7iAKnH/wCjyv8Ar8n/AJzP8gCvy/8AsdTpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFhUVFhZog4ODg2knJycnJwgGBBQUYXd3d3dnIiIiIiIGAAoUFFZxeHd3ZyIiIiIiBwMYFBRRQVqDemcoJCIiIgUCARMPVUlUQ1hiDBEgISFXW1tbW5CTk5OTfTEzMTAwhIaGhoaal5eXl4gODSo0NFlQZYaGkl5tl5eICyYvNDRPRHaGhodOdJmXgQkZGyw0YFyChoaUb4qVl4EaHjI0NGRfanNzmI6Rj5aLLjk7OztITU1NTX+MjICAfjY2NjY2RUJGTU1jTEp8hX4pKzg3NzUjP01NZktdiYV7EBc4Nzc9LVJSTW5TeY2JfhIcOjc3PzxAPkdycGxrdX4dHyU3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+	<style>
+* { margin: 0; padding: 0; }
+
+:root {
+  --a-color: black; 
+}
+
+
+body { font-family: system-ui; background-color: #333; }
+body > li { list-style-type: none; cursor: move; }
+#main { width: 960px; margin: 0 auto; }
+.panel { position: absolute; min-width: 200px; min-height: 80px; border: 1px solid #ccc; z-index: 1; }
+.panel h1 { background-color: #ccc; padding: 3px 12px; font-size: 1.25em; }
+.resizer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 10px 10px;
+  border-color: transparent;
+  border-bottom-color: #333;
+  opacity: 0;
+  cursor: se-resize;
+}
+.delayed-on-hover { transition: opacity 750ms; transition-delay: 2s; }
+.panel:hover .delayed-on-hover { opacity: .75; }
+.panel-delete { position: absolute; top: 0; left: 0; background-color: #b23f3f; font-weight: bold; color: white; opacity: 0; cursor: pointer; font-family: Verdana, Arial, sans-serif; padding-bottom: 4px; padding-left: 1px; height: 7px; width: 8px; font-size: 9px; }
+
+.panel-body { list-style-type: none; padding-left: 0px; padding-top: 4px; }
+.panel-body li { padding: 3px; }
+.panel-body li a, body > li a { color: var(--a-color); font-weight: bold; text-decoration: none; }
+body > li { z-index: 3; text-shadow: 0px 0px 6px #FFF;}
+
+
+.dragging {
+  opacity: 0.5;
+}
+
+.droppable {
+  background-color: #ccc;
+}
+
+.placeholder {
+	background-color: #00000020;
+}
+
+.controls { box-shadow: 4px 4px 10px 0px #00000040; display: none; background-color: #ccc; padding: 20px; border: 1px solid #333; position: relative; z-index: 2; color: #000; }
+
+
+.control-button { width: 4px; height: 4px; background-color: #9c9c9c; position: relative; float: left; margin-right: 2px; top: 6px; background-color: #00000020; }
+.control-button > .controls { top: -25px; left: -100px; }
+.control-button:hover div { display: inline-block; }
+.no-control-button .control-button { display: none; }
+
+.panel-settings-button { border: none; width: 10px; height: 10px; position: absolute; top: 2px; right: 2px; background-color: #00000020; }
+.panel-settings-button > .controls { top: -25px; left: -50px; }
+.panel-settings-button:hover div { display: inline-block; }
+
+.input-p { white-space: nowrap; display: flex; justify-content: space-between; }
+.input-p span { font-size: .8em; font-weight: bold; margin-right: 4px; }
+.input-p input { padding: 2px; }
+
+.new-li-button {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background-color: #00000020;
+    color: #FFFFFF20;
+    border: none;
+	font-weight: bold;
+    font-size: 1.2em;
+}
+.new-li-button:hover { cursor: pointer; background-color: #00000080; color: #fff; }
+.new-html-button { left: 32px; }
+.new-hr-button { left: 64px; }
+
+
+body > button { background-color: #000; font-weight: bold; color: #EEE; font-size: 2em; padding: 1px 8px; border-radius: 6px; }
+
+.export-div { position: absolute; bottom: 0; z-index: 9999; width: 90%; height: 600px; margin: 0 auto; }
+.export-div textarea { width: 500px; height: 500px; }
+
+hr { width: 99%; border: 1px dashed var(--a-color); opacity: .75; }
+
+	</style>
+	<script>
+
+	</script>
+</head>
+
+<body>
+	<div id="main">
+
+	</div>
+	<button id="addPanel" title="Add Panel">+</button>
+	<button id="testButton">Test</button>
+	<button id="export" title="Export Settings">Export</button>
+	<button id="import" title="Import Settings">Import</button>
+	<script>
+
+
+
+
+
+
+
+
+
+
+function generateNiceColors() {
+  const color1 = [Math.floor(Math.random() * 156) + 100, Math.floor(Math.random() * 156) + 100, Math.floor(Math.random() * 156) + 100];
+  const color2 = [color1[0] - 30, color1[1] - 30, color1[2] - 30];
+  const color3 = [255 - color1[0], 255 - color1[1], 255 - color1[2]];
+  const color4 = [255 - color2[0], 255 - color2[1], 255 - color2[2]];
+  return [
+    `#${color1.map(c => c.toString(16)).join('')}`,
+    `#${color2.map(c => c.toString(16)).join('')}`,
+    `#${color3.map(c => c.toString(16)).join('')}`,
+    `#${color4.map(c => c.toString(16)).join('')}`
+  ];
+}
+
+
+function _generateNiceColors() {
+  let colorSchemes = ['monochromatic', 'analogous', 'complementary', 'triadic', 'tetradic'];
+  let scheme = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
+  let colors = [];
+  let hue = Math.floor(Math.random() * 361);
+  for (let i = 0; i < 6; i++) {
+    let saturation = Math.floor(Math.random() * 101);
+    let lightness = Math.floor(Math.random() * 101);
+    switch (scheme) {
+      case 'monochromatic':
+        colors.push(`hsl(${hue},${saturation}%,${lightness}%)`);
+        break;
+      case 'analogous':
+        hue = (hue + 30) % 360;
+        colors.push(`hsl(${hue},${saturation}%,${lightness}%)`);
+        break;
+      case 'complementary':
+        hue = (hue + (i < 3 ? 0 : 180)) % 360;
+        colors.push(`hsl(${hue},${saturation}%,${lightness}%)`);
+        break;
+      case 'triadic':
+        hue = (hue + (i < 2 ? 0 : i < 4 ? 120 : 240)) % 360;
+        colors.push(`hsl(${hue},${saturation}%,${lightness}%)`);
+        break;
+      case 'tetradic':
+        hue = (hue + (i < 2 ? 0 : i < 4 ? 90 : i < 6 ? 180 : 270)) % 360;
+        colors.push(`hsl(${hue},${saturation}%,${lightness}%)`);
+        break;
+    }
+  }
+  return colors;
+}
+
+
+
+
+
+
+function test(){
+	alert("Test function called");
+}
+
+function cssColorToHex(color) {
+  let canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  let ctx = canvas.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, 1, 1);
+  let data = ctx.getImageData(0, 0, 1, 1).data;
+  let r = data[0].toString(16).padStart(2, '0');
+  let g = data[1].toString(16).padStart(2, '0');
+  let b = data[2].toString(16).padStart(2, '0');
+  return `#${r}${g}${b}`;
+}
+
+
+function newElement(tagName, settings){
+	// classes, attributes, innerHTML
+	let result = document.createElement(tagName);
+	if(settings?.classes){
+		settings.classes.forEach(setting => {
+			result.classList.add(...settings.classes);
+		});
+	}
+	if(settings?.attributes){
+		Object.keys(settings.attributes).forEach(key => {
+			result.setAttribute(key, settings.attributes[key]);
+		});
+	}
+	if(settings?.innerHTML){
+		result.innerHTML = settings.innerHTML;
+	}
+	return result;
+}
+
+
+function createInputP(settings){
+	// text, target, targetPropType, targetPropName
+	let result = newElement('p', { classes: ["input-p"] });
+	
+	let input = newElement('input', {attributes: {type: settings.inputType, autocomplete: "off"}});
+	input.setAttribute('value', settings.initialValue);
+	let span = newElement('span');
+	span.innerHTML = settings.text;
+	result.appendChild(span);
+	result.appendChild(input);
+	input.addEventListener("input", e => {
+		switch(settings.targetPropType){
+			case "innerHTML":
+				settings.target.innerHTML = e.target.value;
+				break;
+			case "attribute":
+				settings.target.setAttribute(settings.targetPropName, e.target.value);
+				break;
+			case "style-set-property":
+				settings.target.style.setProperty(settings.targetPropName, e.target.value);
+				// no break here intentionally
+			case "style-property":
+				settings.target.style[settings.targetPropName] = e.target.value;
+				break;
+				
+		}
+	});
+	input.addEventListener('change', e => {
+		saveSettings();
+	});
+	return result;
+}
+
+
+function createListItem(settings){
+	let resultLi = document.createElement('li');
+	let controlButton = newElement('div', {classes: ["control-button"]} );
+	resultLi.appendChild(controlButton);
+	let controls = newElement('div', {classes: ["controls"]} );
+	controlButton.appendChild(controls);
+	let form = newElement('form', {attributes: {onsubmit: 'return false' }});
+	form.addEventListener('submit', evt => {return false});
+	controls.appendChild(form);
+	
+	switch(settings.type){
+		case "link":		
+			var a = document.createElement('a');
+			a.setAttribute('href', settings.href);
+			a.innerHTML = settings.innerHTML;
+			resultLi.appendChild(a);
+			
+			var p1 = createInputP({
+				inputType: 'text',
+				text: "Link Text:",
+				target: a,
+				targetPropType: 'innerHTML',
+				targetPropName: false,
+				initialValue: settings.innerHTML
+			});
+			
+			var p2 = createInputP({
+				inputType: 'text',
+				text: "URL:",
+				target: a,
+				targetPropType: 'attribute',
+				targetPropName: 'href',
+				initialValue: settings.href
+			});
+			form.appendChild(p1);			
+			form.appendChild(p2);
+			resultLi.getValue = function(){
+				return {
+					type: "link",
+					innerHTML: a.innerHTML,
+					href: a.getAttribute('href')
+				}
+			}
+			resultLi.setValue = function(obj){
+				a.innerHTML = obj.innerHTML;
+				a.setAttribute('href', obj.href);
+			}			
+			break;
+		case "html":
+			var wrapper = document.createElement('div');
+			wrapper.innerHTML = settings.innerHTML;
+			resultLi.appendChild(wrapper);
+			
+			var p1 = createInputP({
+				inputType: 'text',
+				text: "HTML:",
+				target: wrapper,
+				targetPropType: 'innerHTML',
+				targetPropName: false,
+				initialValue: settings.innerHTML
+			});
+			
+			form.appendChild(p1);			
+			
+			resultLi.getValue = function(){
+				return {
+					type: "html",
+					innerHTML: wrapper.innerHTML
+				}
+			}
+			resultLi.setValue = function(obj){
+				wrapper.innerHTML = obj.innerHTML;
+			}			
+			break;
+		case "hr":
+			var hr = document.createElement('hr');
+			resultLi.appendChild(hr);
+			resultLi.classList.add('no-control-button');
+			resultLi.getValue = function(){
+				return {
+					type: "hr",
+					innerHTML: ''
+				}
+			}
+			break;
+	}
+	return resultLi;
+}
+
+
+function createPanels(settings){
+	settings.panels.forEach(function(panelSettings){
+		createPanel(panelSettings);
+	});
+}
+
+function createPanel(providedSettings){
+	const defaultSettings = {
+		randomize: false,
+		style: {
+			width: "200px",
+			height: "200px",
+			top: "200px",
+			left: "200px",
+			backgroundColor: '#CCC',
+			'--a-color': '#333'
+		},
+		header: {
+			innerHTML: "Panel",
+			style: {
+				backgroundColor: '#777',
+				color: '#333'
+			}
+		}
+	}
+	const settings = {...defaultSettings, ...providedSettings};
+	
+	if(settings.randomize){
+		const niceColors = generateNiceColors();		
+		settings.style.backgroundColor = niceColors[0];
+		settings.header.style.backgroundColor = niceColors[1];
+		settings.style['--a-color'] = niceColors[2];
+		settings.header.style.color = niceColors[3];
+		settings.style.borderColor = niceColors[1];
+	}
+	
+	const resultDiv = document.createElement('div');
+	
+	resultDiv.classList.add('panel');
+	
+	Object.assign(resultDiv.style, settings.style);
+	resultDiv.style.setProperty('--a-color', settings.style['--a-color']);
+	
+	const header = document.createElement('h1');
+	header.classList.add('panel-header');
+	header.classList.add('drag-handle');
+	header.innerHTML = settings.header.innerHTML;
+	Object.assign(header.style, settings.header.style);
+	resultDiv.appendChild(header);
+	
+	const deleteButton = document.createElement('div');
+	deleteButton.innerHTML = 'X';
+	deleteButton.classList.add('panel-delete');
+	deleteButton.classList.add('delayed-on-hover');
+	deleteButton.addEventListener('click', function(){
+		if(confirm("Are you sure?")){
+			resultDiv.remove();
+			saveSettings();
+		}
+	});
+	resultDiv.appendChild(deleteButton);
+	
+	const body = document.createElement('ul');
+	body.classList.add('panel-body');
+	resultDiv.appendChild(body);
+	
+	if(settings.listItems){
+		settings.listItems.forEach(function(itemSettings){
+			const li = createListItem(itemSettings);
+			body.appendChild(li);
+		});
+	}
+	
+	const newLiButton = newElement('button', {innerHTML: '+', classes: ['new-li-button']});
+	resultDiv.appendChild(newLiButton);
+	newLiButton.addEventListener('click', e => {
+		body.appendChild(createListItem(
+			{
+				type: 'link',
+				innerHTML: 'New Link',
+				href: 'https://google.com'
+			}
+		));
+	});
+	
+	const newHTMLButton = newElement('button', {innerHTML: '&gt;', classes: ['new-li-button', 'new-html-button']});
+	resultDiv.appendChild(newHTMLButton);
+	newHTMLButton.addEventListener('click', e => {
+		body.appendChild(createListItem(
+			{
+				type: 'html',
+				innerHTML: 'Enter HTML'
+			}
+		));
+	});
+	
+	const newHrButton = newElement('button', {innerHTML: '&#8212;', classes: ['new-li-button', 'new-hr-button']});
+	resultDiv.appendChild(newHrButton);
+	newHrButton.addEventListener('click', e => {
+		body.appendChild(createListItem(
+			{
+				type: 'hr',
+				innerHTML: ''
+			}
+		));
+	});
+	
+	const panelSettingsButton = newElement('button', {innerHTML: '...', classes: ['panel-settings-button']});
+	resultDiv.appendChild(panelSettingsButton);
+	let controls = newElement('div', {classes: ["controls"]} );
+	panelSettingsButton.appendChild(controls);
+	
+	let p1 = createInputP({
+		inputType: 'text',
+		text: "Header Text:",
+		target: header,
+		targetPropType: 'innerHTML',
+		targetPropName: false,
+		initialValue: header.innerHTML
+	});
+	
+	let p2 = createInputP({
+		inputType: 'color',
+		text: "Header Background:",
+		target: header,
+		targetPropType: 'style-property',
+		targetPropName: 'backgroundColor',
+		initialValue: cssColorToHex(header.style.backgroundColor)
+	});
+	
+	let p3 = createInputP({
+		inputType: 'color',
+		text: "Header Text:",
+		target: header,
+		targetPropType: 'style-property',
+		targetPropName: 'color',
+		initialValue: cssColorToHex(header.style.color)
+	});	
+	
+	let p4 = createInputP({
+		inputType: 'color',
+		text: "Main Background:",
+		target: resultDiv,
+		targetPropType: 'style-property',
+		targetPropName: 'backgroundColor',
+		initialValue: cssColorToHex(resultDiv.style.backgroundColor)
+	});
+	
+	let p5 = createInputP({
+		inputType: 'color',
+		text: "Links:",
+		target: resultDiv,
+		targetPropType: 'style-set-property',
+		targetPropName: '--a-color',
+		initialValue: cssColorToHex(resultDiv.style['--a-color'])
+	});
+	
+	let p6 = createInputP({
+		inputType: 'color',
+		text: "Border:",
+		target: resultDiv,
+		targetPropType: 'style-property',
+		targetPropName: 'borderColor',
+		initialValue: cssColorToHex(resultDiv.style.borderColor)
+	});
+	
+	controls.appendChild(p1);
+	controls.appendChild(p2);
+	controls.appendChild(p3);
+	controls.appendChild(p4);
+	controls.appendChild(p5);
+	controls.appendChild(p6);
+	
+	makeListSortable(body);
+	makeElementDraggable(resultDiv);
+    makeElementResizeable(resultDiv);
+	document.getElementById('main').appendChild(resultDiv);
+}
+
+
+
+function moveToEnd(elem) {
+    // get the parent element of the clicked element
+    var parent = elem.parentNode;
+    // append the clicked element to the parent element
+    // this will move it to the end of its siblings
+    parent.appendChild(elem);
+	console.log("Moved to front");
+}
+
+
+
+function makeListSortable(list) {
+	// Helper function to get the index of an element in a list
+    function getIndex(el) {
+        for (var i = 0; el = el.previousElementSibling; i++);
+        return i;
+    }
+	
+	function getSiblings(elem) {
+		const siblings = Array.from(elem.parentNode.childNodes).filter(node => node.nodeType === Node.ELEMENT_NODE && node !== elem);
+		return siblings;
+	}
+	
+	list.addEventListener("mousedown", function (e) {
+        if (e.target.tagName === "LI") {
+            var item = e.target;
+            var list = item.parentNode;
+            var index = getIndex(item);
+            var rect = item.getBoundingClientRect();
+            var offsetY = e.clientY - rect.top;
+			var lists = document.querySelectorAll("ul");
+
+            // Create a placeholder element to keep the space where the item was
+            var placeholder = document.createElement("li");
+			placeholder.classList.add('placeholder');
+            placeholder.style.height = rect.height - 4 + "px";
+            list.insertBefore(placeholder, item);
+
+            // Move the item to the top of the page and set its position
+            item.style.position = "absolute";
+            item.style.width = rect.width + "px";
+            item.style.top = (e.clientY - offsetY) + "px";
+            item.style.left = rect.left + "px";
+            document.body.appendChild(item);
+
+            // Listen for mousemove events to update the position of the item
+            document.addEventListener("mousemove", onMouseMove);
+
+            // Listen for mouseup events to drop the item
+            document.addEventListener("mouseup", onMouseUp);
+
+            function onMouseMove(e) {
+                e.preventDefault();
+				// Update the position of the item
+                item.style.top = (e.clientY - offsetY) + "px";
+
+                // Check if the item is over one of the lists
+                for (var i = 0; i < lists.length; i++) {
+                    var l = lists[i];
+                    var r = l.getBoundingClientRect();
+                    if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+                        // Check if the item is over one of the children of the list
+                        for (var j = 0; j < l.children.length; j++) {
+                            var c = l.children[j];
+                            if (c !== placeholder) {
+                                var r2 = c.getBoundingClientRect();
+                                if (e.clientY >= r2.top && e.clientY <= r2.bottom) {
+                                    // Swap the placeholder and the child
+                                    l.insertBefore(placeholder, c);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            function onMouseUp(e) {
+                // Remove the event listeners
+                document.removeEventListener("mousemove", onMouseMove);
+                document.removeEventListener("mouseup", onMouseUp);
+
+                // Drop the item in its new position
+                placeholder.parentNode.insertBefore(item, placeholder);
+                placeholder.parentNode.removeChild(placeholder);
+                item.style.position = "";
+                item.style.width = "";
+                item.style.top = "";
+                item.style.left = "";
+				
+				// Save
+				saveSettings();
+            }
+        }
+    });
+}
+
+function makeElementDraggable(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    const h1s = elmnt.getElementsByClassName('drag-handle');
+    if (h1s) {
+        // if present, the first header is where you move the DIV from:
+        h1s[0].onmousedown = dragMouseDown;
+    } else {
+        // otherwise, move the DIV from anywhere inside the DIV:
+        elmnt.onmousedown = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+		moveToEnd(elmnt);
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        saveSettings();
+		document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
+function makeElementResizeable(targetElement) {
+    const resizer = document.createElement('div');
+    let startX,
+    startY,
+    startWidth,
+    startHeight;
+
+    resizer.classList.add('resizer');
+	resizer.classList.add('delayed-on-hover');
+    targetElement.appendChild(resizer);
+
+    resizer.addEventListener('mousedown', initResize, false);
+
+    function initResize(e) {
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = parseInt(document.defaultView.getComputedStyle(targetElement).width, 10);
+        startHeight = parseInt(document.defaultView.getComputedStyle(targetElement).height, 10);
+        document.documentElement.addEventListener('mousemove', doResize, false);
+        document.documentElement.addEventListener('mouseup', stopResize, false);
+    }
+
+    function doResize(e) {
+        e.preventDefault();
+		const newWidth = startWidth + e.clientX - startX;
+        const newHeight = startHeight + e.clientY - startY;
+        targetElement.style.width = newWidth + 'px';
+        targetElement.style.height = newHeight + 'px';
+    }
+
+    function stopResize() {
+        saveSettings();
+        document.documentElement.removeEventListener('mousemove', doResize, false);
+        document.documentElement.removeEventListener('mouseup', stopResize, false);
+    }
+}
+
+
+
+function saveSettings(){
+	const settings = getSettings();
+	console.log(settings);
+	localStorage.setItem('sz_links_settings', JSON.stringify(settings));
+	console.log("Settings saved.");
+}
+
+function getSettings(){
+	const htmlBodyStyleProps = ['backgroundColor'];
+	const panelBodyStyleProps = ['width', 'height', 'top', 'left', 'backgroundColor', '--a-color', 'borderColor'];
+	const panelHeaderStyleProps = ['backgroundColor', 'color'];
+	let settings = {
+		body: {
+			style: {}
+		},
+		panels: []
+	};
+	// BODY:
+	const body = document.querySelector('body');
+	htmlBodyStyleProps.forEach(function(prop){
+		settings.body.style[prop] = body.style[prop];
+	});
+	// PANELS:
+	document.querySelectorAll('.panel').forEach(function(panel){
+		let panelSettings = {
+			style: {}
+		};
+		panelBodyStyleProps.forEach(function(prop){
+			panelSettings.style[prop] = panel.style[prop];
+		});
+		const header = panel.querySelector('h1');
+		if(header){
+			panelSettings.header = {};
+			panelSettings.header.style = {};
+			panelHeaderStyleProps.forEach(function(prop){
+				panelSettings.header.style[prop] = header.style[prop];
+			});
+			panelSettings.header.innerHTML = header.innerHTML;
+		}
+		panelSettings.listItems = [];
+		panelSettings.listItems = [];
+		const listItems = panel.querySelectorAll('.panel-body > li');
+		listItems.forEach(function(li){
+			panelSettings.listItems.push(li.getValue());
+		});
+		settings.panels.push(panelSettings);
+	});
+	// console.log(settings);
+	return settings;
+}
+
+function exportSettings(){
+	const main = document.getElementById('main');
+	const div = newElement('div', {classes: ['export-div']});
+	let textarea = newElement('textarea');
+	textarea.value = JSON.stringify(getSettings(), null, 4);
+	div.appendChild(textarea);
+	main.appendChild(div);
+	textarea.select();
+}
+
+function importSettings(){
+	const main = document.getElementById('main');
+	const div = newElement('div', {classes: ['import-div']});
+	let textarea = newElement('textarea');
+	textarea.id = 'import-textarea';
+	div.appendChild(textarea);
+	main.appendChild(div);
+	const submitButton = newElement('button');
+	submitButton.innerHTML = 'Submit';
+	div.appendChild(submitButton);
+	submitButton.addEventListener('click', function(){
+		let json = textarea.value;
+		console.log(json);
+		try	{
+			let obj = JSON.parse(json);
+			console.log(obj);
+			createPanels(obj);
+		} catch(err){
+			console.log(err);
+		}
+	});
+}
+
+//////////////////////////////////////////////////////////////////////
+
+let settings = JSON.parse(localStorage.getItem('sz_links_settings'));
+
+if(settings){
+	createPanels(settings);
+}
+
+document.getElementById('addPanel').addEventListener('click', function(evt){
+	createPanel({randomize: true});
+});
+
+document.getElementById('testButton').addEventListener('click', function(evt){
+	test();
+});
+
+document.getElementById('export').addEventListener('click', function(evt){
+	exportSettings();
+});
+
+document.getElementById('import').addEventListener('click', function(evt){
+	importSettings();
+});
+
+</script>
+</body>
+</html>
